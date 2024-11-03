@@ -52,10 +52,10 @@ fun <T, R> asyncMap(
 
     var shouldStop = false
 
-    for (i in list.indices) {
+    for (e in list) {
         if (shouldStop) break
 
-        callback(list[i]) {
+        callback(e) {
             if (it.isFailure) {
                 finalCallback(Result.failure(Exception("Error")))
                 shouldStop = true

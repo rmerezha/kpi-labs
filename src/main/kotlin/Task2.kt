@@ -1,6 +1,7 @@
 package org.example
 
 import kotlinx.coroutines.*
+import kotlin.system.exitProcess
 
 fun main() {
     val list = mutableListOf<Int>()
@@ -22,7 +23,10 @@ fun main() {
 suspend fun <T, R> asyncMap(
     list: List<T>,
     mapFunction: suspend(T) -> Result<R>,
-    handler: (Result<R>) -> R = { it.getOrThrow() }
+    handler: (Result<R>) -> R = { it.getOrElse({err ->
+        println("Error: ${err.message}")
+        exitProcess(0)
+    }) }
 ): List<R> {
     return coroutineScope {
         list.map {
@@ -33,10 +37,10 @@ suspend fun <T, R> asyncMap(
 
 suspend fun testFunc(e: Int): Result<Int> {
     delay(1000)
-    return if ((1..1000).random() != 1) {
+    return if ((1..100).random() != 1) {
         Result.success(e * e)
     } else {
-        Result.failure(Exception())
+        Result.failure(Exception("<Error message>"))
     }
 }
 
