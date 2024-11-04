@@ -1,5 +1,5 @@
-const asyncMap = (array, mapFunction) => {
-    return Promise.all(array.map(item => mapFunction(item)));
+const asyncMap = (array, asyncTransform) => {
+    return Promise.all(array.map(item => asyncTransform(item)));
 };
 
 

@@ -1,19 +1,18 @@
 package org.example
 
 import kotlinx.coroutines.*
-import kotlin.system.exitProcess
 
-fun main() {
-    val list = mutableListOf<Int>()
+fun main() = runBlocking {
+    val list1 = listOf(0.0, 4.0, 9.0, 25.0, 36.0, 49.0)
+    val list2 = listOf(0.0, -1.0, 2.0, 3.0, 4.0, 5.0)
 
-    for (i in 0 until 100) {
-        list.add(i)
-    }
     val startTime = System.currentTimeMillis()
 
-    runBlocking {
-        println(asyncMap(list, ::testFunc))
-    }
+    val job1 = launch { println(asyncMap(list1, ::sqrt)) }
+    val job2 = launch { try { println(asyncMap(list2, ::sqrt))} catch (e: Exception) {println(e.message)} }
+
+    job1.join()
+    job2.join()
 
     val endTime = System.currentTimeMillis()
     val elapsedTime = endTime - startTime
@@ -21,26 +20,23 @@ fun main() {
 }
 
 suspend fun <T, R> asyncMap(
-    list: List<T>,
-    mapFunction: suspend(T) -> Result<R>,
-    handler: (Result<R>) -> R = { it.getOrElse({err ->
-        println("Error: ${err.message}")
-        exitProcess(0)
-    }) }
+    items: List<T>,
+    asyncTransform: suspend (T) -> Result<R>,
+    resultHandler: (Result<R>) -> R = { it.getOrThrow() }
 ): List<R> {
     return coroutineScope {
-        list.map {
-            async { mapFunction(it) }
-        }.awaitAll().map { e -> handler(e) }
+        items.map { item ->
+            async { asyncTransform(item) }
+        }.awaitAll().map(resultHandler)
     }
 }
 
-suspend fun testFunc(e: Int): Result<Int> {
+suspend fun sqrt(num: Double): Result<Double> {
     delay(1000)
-    return if ((1..100).random() != 1) {
-        Result.success(e * e)
-    } else {
-        Result.failure(Exception("<Error message>"))
+    if (num < 0) {
+        return Result.failure(Exception("negative value: $num"))
     }
+    return Result.success(kotlin.math.sqrt(num))
+
 }
 
