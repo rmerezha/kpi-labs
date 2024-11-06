@@ -37,8 +37,8 @@ fun main() {
         val list2: List<Int> = listOf(1, -2, 3, 4, 5)
 
         val startTime = System.currentTimeMillis()
-        launch { println(tp.asyncMap(list1, ::sqrt)) }
-        launch { try { println(tp.asyncMap(list2, ::sqrt))} catch (e: IllegalArgumentException) {println(e.message)} }
+        launch { println(tp.asyncMap(list1, ::cube)) }
+        launch { try { println(tp.asyncMap(list2, ::cube))} catch (e: IllegalArgumentException) {println(e.message)} }
         setTimeout(500) {
             tp.cancel()
             val endTime = System.currentTimeMillis()
@@ -48,7 +48,7 @@ fun main() {
     }
 }
 
-suspend fun sqrt(num: Int): Result<Int> {
+suspend fun cube(num: Int): Result<Int> {
     delay(1000)
     return if (num < 0) {
         Result.failure(IllegalArgumentException("negative value: $num"))

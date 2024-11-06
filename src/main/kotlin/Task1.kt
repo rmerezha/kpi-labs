@@ -22,7 +22,7 @@ fun main() = runBlocking {
 
 fun <T, R> asyncMap(
     items: List<T>,
-    asyncTask: (T, (Result<R>) -> Unit) -> Unit, // (err, ...) => {...}
+    asyncTransform: (T, (Result<R>) -> Unit) -> Unit,
     onComplete: (Result<List<R>>) -> Unit = { result ->
         result
             .onSuccess { values -> println("Success: $values") }
@@ -36,11 +36,11 @@ fun <T, R> asyncMap(
     for (item in items) {
         if (hasErrorOccurred) break
 
-        asyncTask(item) { result ->
+        asyncTransform(item) { result ->
             if (result.isFailure) {
-                onComplete(Result.failure(Exception(result.exceptionOrNull()?.message)))
+                onComplete(Result.failure(Exception(result.exceptionOrNull()!!.message)))
                 hasErrorOccurred = true
-                return@asyncTask
+                return@asyncTransform
             }
 
             result.onSuccess { value ->

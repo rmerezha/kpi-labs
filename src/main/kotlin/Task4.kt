@@ -1,14 +1,18 @@
 package org.example
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
-const val FILE_PATH = "src/main/resources/big.txt"
+const val FILE_PATH = "/home/rmerezha/big.txt"
 
 fun readLines(filePath: String): Flow<String> = flow {
     File(filePath).bufferedReader().useLines { lines ->
         for (line in lines) {
+//            delay(500)
             emit(line)
         }
     }
@@ -19,6 +23,7 @@ suspend fun countWordInFile(filePath: String, word: String) {
 
     readLines(filePath)
         .onEach { line ->
+//            println(line.length)
             lineCounts.count(line, word)
         }
         .collect()
